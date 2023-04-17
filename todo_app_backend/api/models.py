@@ -8,9 +8,9 @@ class User(models.Model):
 
 class Tasks(models.Model):
     _id = models.AutoField(primary_key=True)
-    title = models.EmailField(max_length=254)
+    title = models.CharField(max_length=254)
     description = models.CharField(max_length=1500)
-    imagePath = models.EmailField(max_length=500)
+    imagePath = models.CharField(max_length=500)
     creator = models.CharField(max_length=100)
 
 
