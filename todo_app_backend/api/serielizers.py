@@ -6,7 +6,7 @@ from api.models import User, Tasks
 class UserSerielizer(serializers.ModelSerializer):
     class Meta:
         model=User
-        fields=('_id', 'email', 'password')
+        fields='__all__'
 
 class TasksSerielizer(serializers.ModelSerializer):
     class Meta:
