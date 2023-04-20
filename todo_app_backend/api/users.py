@@ -1,4 +1,5 @@
 from django.http import HttpResponseServerError, HttpResponseBadRequest
+from django.contrib.auth.hashers import make_password, check_password
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes
 from api.models import User
@@ -12,9 +13,10 @@ from rest_framework_simplejwt.tokens import Token, AccessToken
 @authentication_classes([])
 def signup(req):
     try:
+        hash = make_password(req.data.get('password'))
         user_serielised = UserSerielizer(data={
             'email': req.data.get('email'),
-            'password': req.data.get('password')
+            'password': hash
         })
         print(user_serielised.is_valid())
         if user_serielised.is_valid():
@@ -60,8 +62,7 @@ def login(req):
             'password': user_json[0]['fields']['password'],
         }
 
-        # Use bcrypt compare instead
-        if not user['password'] == req.data.get('password'):
+        if not check_password(req.data.get('password'), user['password']):
             return HttpResponseBadRequest(json.dumps({
                         'status': {
                             'code': 400,
