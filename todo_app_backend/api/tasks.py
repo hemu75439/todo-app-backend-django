@@ -7,13 +7,11 @@ from django.core import serializers
 from django.core.files.storage import default_storage
 import json
 import re
-
+from api.authentication import ApiAuthentication
 
 @api_view(['GET'])
-@authentication_classes([])
 def getTasks(request):
     try:
-        print(request.scheme)
         tasks_from_db = Tasks.objects.all()
         tasks_json = serializers.serialize('json', list(tasks_from_db))
         tasks_json = json.loads(tasks_json)
@@ -46,9 +44,16 @@ def getTasks(request):
     
 
 @api_view(['GET'])
-@authentication_classes([])
+@authentication_classes([ApiAuthentication])
 def getTask(request, id):
     try:
+        if(request.user is None):
+            return HttpResponseServerError(json.dumps({
+            'status': {
+                'code': 403,
+                'message': 'Unauthorised!'
+            }, 
+        }), content_type="application/json")
         tasks_from_db = Tasks.objects.filter(pk=id)
         tasks_json = serializers.serialize('json', list(tasks_from_db))
         tasks_json = json.loads(tasks_json)
@@ -77,9 +82,16 @@ def getTask(request, id):
 
 
 @api_view(['POST'])
-@authentication_classes([])
+@authentication_classes([ApiAuthentication])
 def addTask(req):
     try:
+        if(req.user is None):
+            return HttpResponseServerError(json.dumps({
+            'status': {
+                'code': 403,
+                'message': 'Unauthorised!'
+            }, 
+        }), content_type="application/json")
         file = req.data.get('image')
         extension = file.content_type.split('/').pop()
         file_name = re.sub(re.compile(r'\s+'), '', file.name) + '.' + extension
@@ -112,9 +124,16 @@ def addTask(req):
 
 
 @api_view(['PATCH'])
-@authentication_classes([])
+@authentication_classes([ApiAuthentication])
 def updateTask(req, id):
     try:
+        if(req.user is None):
+            return HttpResponseServerError(json.dumps({
+            'status': {
+                'code': 403,
+                'message': 'Unauthorised!'
+            }, 
+        }), content_type="application/json")
         imagePath = None
         if req.data.get('imagePath'):
             imagePath = req.data.get('imagePath')
@@ -151,9 +170,16 @@ def updateTask(req, id):
 
 
 @api_view(['DELETE'])
-@authentication_classes([])
+@authentication_classes([ApiAuthentication])
 def deleteTask(req, id):
     try:
+        if(req.user is None):
+            return HttpResponseServerError(json.dumps({
+            'status': {
+                'code': 403,
+                'message': 'Unauthorised!'
+            }, 
+        }), content_type="application/json")
         Tasks.objects.filter(pk=id).delete()
         res = {
             'status': {

@@ -7,7 +7,7 @@ from api.serielizers import UserSerielizer
 from django.core import serializers
 import json
 from datetime import timedelta
-from rest_framework_simplejwt.tokens import Token, AccessToken
+import jwt
 
 @api_view(['POST'])
 @authentication_classes([])
@@ -55,24 +55,21 @@ def login(req):
         
         user_json = serializers.serialize('json', user_from_db)
         user_json = json.loads(user_json)
-        print(user_json)
-        user = {
-            '_id': user_json[0]['pk'],
-            'email': user_json[0]['fields']['email'],
-            'password': user_json[0]['fields']['password'],
-        }
 
-        if not check_password(req.data.get('password'), user['password']):
+        if not check_password(req.data.get('password'), user_json[0]['fields']['password']):
             return HttpResponseBadRequest(json.dumps({
                         'status': {
                             'code': 400,
                             'message': 'Invalid Credentials!'
                         }, 
                     }), content_type="application/json")
-        
-        print('from db ::\n', user)
-        # token = Token.for_user(user)
-        token = "abcd"
+
+        user = {
+            '_id': user_json[0]['pk'],
+            'email': user_json[0]['fields']['email']
+        }
+        token = jwt.encode(user, "secret", algorithm="HS256")
+
         res = {
             'status': {
                 'code': 200,
